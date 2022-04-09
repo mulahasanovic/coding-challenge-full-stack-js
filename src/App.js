@@ -16,12 +16,16 @@ import Grid from '@mui/material/Grid';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import ViewComfyIcon from '@mui/icons-material/ViewComfy';
 
+import GridItem from "./components/GridItem";
+import ListItem from "./components/ListItem";
+
 function App() {
   const [search, setSearch] = useState('');
   const [tags, setTags] = useState('');
   const [isGrid, setIsGrid] = useState(true);
 
-  const [{ data, loading, error }, refetch] = useAxios(`http://localhost:3001/api/search?tags=${tags}`);
+  const [{ data, loading, error }] = useAxios(`http://localhost:3001/api/search?tags=${tags}`);
+
   return (
     <Container maxWidth="xl">
       <Box
@@ -42,8 +46,14 @@ function App() {
           Hello crewfire!
         </Typography>
         <Stack
+          id="seachForm"
           spacing={2}
           direction="row"
+          component="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setTags(search);
+          }}
         >
           <TextField
             id="search"
@@ -53,10 +63,7 @@ function App() {
           />
           <Button
             variant="contained"
-            onClick={() => {
-              setTags(search);
-              refetch();
-            }}
+            type="submit"
           >
             Search
           </Button>
@@ -65,7 +72,6 @@ function App() {
             value={isGrid}
             exclusive
             onChange={(e, v) => {
-              console.log(e, v)
               setIsGrid(v);
             }}
           >
@@ -81,23 +87,38 @@ function App() {
           {
             error
               ? <Stack sx={{ width: '100%' }} spacing={2}>
-                <Alert severity="error">{error.message}</Alert>
+                <Alert severity="error">{error}</Alert>
               </Stack>
               : <Grid
                 container
                 spacing={2}
               >
-                {data?.map((item, index) => (
-                  <Grid
-                    item
-                    key={index}
-                    {...(isGrid ? { xs: 12, sm: 6, md: 4, lg: 3 } : { xs: 12 })}
-                  >
-                    {/* <h3>{item.title}</h3>
-                    <p>{item.tags}</p> */}
-                    <img src={item.media.m} alt={item.title} />
-                  </Grid>
-                )) || []
+                {data?.map((item, index) => {
+
+                  const itemProps = {
+                    title: item.title,
+                    imageSrc: item.media.m,
+                    tags: item.tags,
+                  };
+
+                  return (
+                    <Grid
+                      item
+                      key={index}
+                      {...(isGrid ? { xs: 12, sm: 6, md: 4, lg: 3 } : { xs: 12 })}
+                    >
+                      {
+                        isGrid
+                          ? <GridItem
+                            {...itemProps}
+                          />
+                          : <ListItem
+                            {...itemProps}
+                          />
+                      }
+                    </Grid>
+                  )
+                }) || []
                 }
               </Grid>
           }
