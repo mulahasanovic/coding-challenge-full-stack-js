@@ -1,5 +1,4 @@
 import { useState } from "react";
-import useAxios from 'axios-hooks';
 
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
@@ -19,12 +18,14 @@ import ViewComfyIcon from '@mui/icons-material/ViewComfy';
 import GridItem from "./components/GridItem";
 import ListItem from "./components/ListItem";
 
+import useSearch from './hooks/useSearch';
+
 function App() {
   const [search, setSearch] = useState('');
   const [tags, setTags] = useState('');
   const [isGrid, setIsGrid] = useState(true);
 
-  const [{ data, loading, error }] = useAxios(`http://localhost:3001/api/search?tags=${tags}`);
+  const { data, loading, error } = useSearch(tags);
 
   return (
     <Container maxWidth="xl">
@@ -72,7 +73,9 @@ function App() {
             value={isGrid}
             exclusive
             onChange={(e, v) => {
-              setIsGrid(v);
+              if(v !== null) {
+                setIsGrid(v);
+              }
             }}
           >
             <ToggleButton value={true}>
@@ -86,39 +89,42 @@ function App() {
         <Box mt={2}>
           {
             error
-              ? <Stack sx={{ width: '100%' }} spacing={2}>
-                <Alert severity="error">{error}</Alert>
+              ? <Stack>
+                <Alert severity="error">{error.message}</Alert>
               </Stack>
               : <Grid
                 container
                 spacing={2}
               >
-                {data?.map((item, index) => {
+                {data?.length > 0
+                  ? data?.map((item, index) => {
+                    const itemProps = {
+                      title: item.title,
+                      imageSrc: item.media.m,
+                      tags: item.tags,
+                    };
 
-                  const itemProps = {
-                    title: item.title,
-                    imageSrc: item.media.m,
-                    tags: item.tags,
-                  };
-
-                  return (
-                    <Grid
-                      item
-                      key={index}
-                      {...(isGrid ? { xs: 12, sm: 6, md: 4, lg: 3 } : { xs: 12 })}
-                    >
-                      {
-                        isGrid
-                          ? <GridItem
-                            {...itemProps}
-                          />
-                          : <ListItem
-                            {...itemProps}
-                          />
-                      }
-                    </Grid>
-                  )
-                }) || []
+                    return (
+                      <Grid
+                        item
+                        key={index}
+                        {...(isGrid ? { xs: 12, sm: 6, md: 4, lg: 3 } : { xs: 12 })}
+                      >
+                        {
+                          isGrid
+                            ? <GridItem
+                              {...itemProps}
+                            />
+                            : <ListItem
+                              {...itemProps}
+                            />
+                        }
+                      </Grid>
+                    )
+                  })
+                  : tags !== '' && <Grid item xs={12}>
+                    <Alert mt={4} severity="info">No results found</Alert>
+                  </Grid>
                 }
               </Grid>
           }
