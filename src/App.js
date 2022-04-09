@@ -9,6 +9,7 @@ function App() {
 
   return (
     <div>
+      <h1>Hello crewfire!</h1>
       <input type="search" value={search} onChange={e => setSearch(e.target.value)} />
       <button onClick={() => {
         setTags(search);
