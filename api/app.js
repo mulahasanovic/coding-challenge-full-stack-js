@@ -1,13 +1,9 @@
 const express = require('express');
 const app = express();
+const routes = require('./routes');
+const cors = require('cors');
 
-app.use((req, res, next) => {
-  console.log(`${(new Date()).toISOString()}: ${req.method} ${req.url}`);
-  next();
-});
-
-app.get('/api/search', (req, res) => {
-  res.send({message: 'Hello world'});
-});
+app.use(cors());
+app.use('/api', routes);
 
 module.exports = app;
